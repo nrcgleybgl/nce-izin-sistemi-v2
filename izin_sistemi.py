@@ -93,33 +93,36 @@ def pdf_olustur(veri, logo_path="assets/logo.png"):
 # ---------------------------------------------------
 def mail_gonder(alici, konu, icerik):
     try:
-        gonderen = "nrcgleybgl@gmail.com"
-        sifre = "qiln eulh lfho yojy"
+        gonderen = st.secrets["SMTP_EMAIL"]
+        sifre = st.secrets["SMTP_PASSWORD"]
 
         msg = MIMEMultipart()
-        msg["From"] = gonderen
-        msg["To"] = alici
-        msg["Subject"] = konu
-        msg.attach(MIMEText(icerik, "plain"))
+        msg['From'] = gonderen
+        msg['To'] = alici
+        msg['Subject'] = konu
 
-        server = smtplib.SMTP("smtp.gmail.com", 587)
+        msg.attach(MIMEText(icerik, 'plain'))
+
+        server = smtplib.SMTP('smtp.gmail.com', 587)
         server.starttls()
         server.login(gonderen, sifre)
         server.sendmail(gonderen, alici, msg.as_string())
         server.quit()
-
     except Exception as e:
-        print("Mail gönderilemedi:", e)
+        st.error(f"Mail gönderilemedi: {e}")
 
 # ---------------------------------------------------
 # NEONCONSOLE BAĞLANTISI
 # ---------------------------------------------------
+import streamlit as st
+import psycopg2
+
 conn = psycopg2.connect(
-    dbname='neondb',
-    user='neondb_owner',
-    password='npg_NReEM4mL2Jbl',
-    host='ep-nameless-morning-aimuiz3g.c-4.us-east-1.aws.neon.tech',
-    port='5432'
+    dbname=st.secrets["DB_NAME"],
+    user=st.secrets["DB_USER"],
+    password=st.secrets["DB_PASSWORD"],
+    host=st.secrets["DB_HOST"],
+    port=st.secrets["DB_PORT"]
 )
 c = conn.cursor()
 
@@ -568,4 +571,3 @@ else:
 
             except Exception as e:
                 st.error(f"Excel içe aktarılırken hata: {e}")
-

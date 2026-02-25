@@ -116,7 +116,6 @@ def mail_gonder(alici, konu, icerik):
 # ---------------------------------------------------
 # NEONCONSOLE BAĞLANTISI
 # ---------------------------------------------------
-
 conn = psycopg2.connect(
     dbname=st.secrets["DB_NAME"],
     user=st.secrets["DB_USER"],
@@ -172,7 +171,6 @@ def veri_getir():
 # ---------------------------------------------------
 # STREAMLIT ARAYÜZ
 # ---------------------------------------------------
-st.set_page_config(page_title="Pro-İK İzin Portalı", layout="wide")
 
 if 'login_oldu' not in st.session_state:
     st.session_state['login_oldu'] = False
@@ -212,6 +210,7 @@ if not st.session_state.get("login_oldu", False):
                 st.rerun()
             else:
                 st.error("Kullanıcı adı veya şifre hatalı!")
+
 # ---------------------------------------------------
 # ANA PANEL
 # ---------------------------------------------------
@@ -226,7 +225,11 @@ else:
         ana_menu.append("Tüm Talepler (İK)")
         ana_menu.append("Personel Yönetimi (İK)")
 
-    st.sidebar.image("assets/logo.png", width=120)
+    try:
+        st.sidebar.image("assets/logo.png", width=120)
+    except:
+        pass
+
     st.sidebar.title(f"👤 {user['ad_soyad']}")
     st.sidebar.write(f"**Rol:** {rol}")
     st.sidebar.write(f"**Departman:** {user['departman']}")
@@ -309,21 +312,16 @@ else:
                         f"Durum: **{row['durum']}**"
                     )
 
-                    # ❌ SİL BUTONU
                     if col2.button("Sil", key=f"sil_{row['id']}"):
                         c.execute("DELETE FROM talepler WHERE id=%s", (row['id'],))
                         conn.commit()
                         st.success("Talep silindi!")
                         st.rerun()
 
-                    # ✏️ DÜZENLE BUTONU
-                    if col3.button("Düzenle", key=f"duz_{row['id']}"):
+                    if col3.button("Düzenle", key=f"duz_{row['id']}"]:
                         st.session_state["duzenlenecek_id"] = row["id"]
                         st.rerun()
 
-            # ---------------------------------------------------
-            # ✏️ DÜZENLEME FORMU
-            # ---------------------------------------------------
             if "duzenlenecek_id" in st.session_state:
                 duz_id = st.session_state["duzenlenecek_id"]
 
@@ -357,9 +355,6 @@ else:
                     st.success("Talep güncellendi!")
                     st.rerun()
 
-            # ---------------------------------------------------
-            # 🖨️ ONAYLANAN İZİNLERİN PDF ÇIKTISI
-            # ---------------------------------------------------
             st.markdown("---")
             st.subheader("🖨️ Onaylanan İzinlerin PDF Çıktısı")
 
@@ -400,6 +395,7 @@ else:
                         file_name=f"izin_formu_{row['id']}.pdf",
                         mime="application/pdf"
                     )
+
     # ---------------------------------------------------
     # YÖNETİCİ ONAY EKRANI
     # ---------------------------------------------------
@@ -425,7 +421,7 @@ else:
 
                     o_col, r_col = st.columns(2)
 
-                    if o_col.button("Onayla", key=f"on_{row['id']}"):
+                    if o_col.button("Onayla", key=f"on_{row['id']}"]):
                         imza = f"{user['ad_soyad']} ({user['meslek']}) tarafından {date.today()} tarihinde onaylandı."
                         c.execute(
                             "UPDATE talepler SET durum='Onaylandı', onay_notu=%s WHERE id=%s",

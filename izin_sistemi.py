@@ -114,15 +114,34 @@ def mail_gonder(alici, konu, icerik):
         st.error(f"Mail gönderilemedi: {e}")
 
 # ---------------------------------------------------
-# NEONCONSOLE BAĞLANTISI
+# STREAMLIT ARAYÜZ BAŞLANGICI
 # ---------------------------------------------------
-conn = psycopg2.connect(
-    dbname=st.secrets["DB_NAME"],
-    user=st.secrets["DB_USER"],
-    password=st.secrets["DB_PASSWORD"],
-    host=st.secrets["DB_HOST"],
-    port=st.secrets["DB_PORT"]
-)
+
+if 'login_oldu' not in st.session_state:
+    st.session_state['login_oldu'] = False
+    st.session_state['user'] = None
+
+try:
+    st.image("assets/logo.png", width=180)
+except:
+    pass
+
+st.title("🔐 NCE Bordro Danışmanlık ve Eğitim - İK İzin Paneli")
+
+# ---------------------------------------------------
+# DB BAĞLANTISI (UI YÜKLENDİKTEN SONRA)
+# ---------------------------------------------------
+@st.cache_resource
+def get_db():
+    return psycopg2.connect(
+        dbname=st.secrets["DB_NAME"],
+        user=st.secrets["DB_USER"],
+        password=st.secrets["DB_PASSWORD"],
+        host=st.secrets["DB_HOST"],
+        port=st.secrets["DB_PORT"]
+    )
+
+conn = get_db()
 c = conn.cursor()
 
 # ---------------------------------------------------
@@ -168,23 +187,7 @@ def veri_getir():
     except:
         return pd.DataFrame()
 
-# ---------------------------------------------------
-# STREAMLIT ARAYÜZ
-# ---------------------------------------------------
-
-if 'login_oldu' not in st.session_state:
-    st.session_state['login_oldu'] = False
-    st.session_state['user'] = None
-
 df_p = veri_getir()
-
-if not st.session_state['login_oldu']:
-    try:
-        st.image("assets/logo.png", width=180)
-    except:
-        pass
-
-    st.title("🔐 NCE Bordro Danışmanlık ve Eğitim - İK İzin Paneli")
 
 if "Ad Soyad" in df_p.columns:
     df_p.rename(columns={"Ad Soyad": "ad_soyad"}, inplace=True)
@@ -318,7 +321,7 @@ else:
                         st.success("Talep silindi!")
                         st.rerun()
 
-                    if col3.button("Düzenle", key=f"duz_{row['id']}"]:
+                    if col3.button("Düzenle", key=f"duz_{row['id']}"):
                         st.session_state["duzenlenecek_id"] = row["id"]
                         st.rerun()
 
@@ -421,7 +424,7 @@ else:
 
                     o_col, r_col = st.columns(2)
 
-                    if o_col.button("Onayla", key=f"on_{row['id']}"]):
+                    if o_col.button("Onayla", key=f"on_{row['id']}"):
                         imza = f"{user['ad_soyad']} ({user['meslek']}) tarafından {date.today()} tarihinde onaylandı."
                         c.execute(
                             "UPDATE talepler SET durum='Onaylandı', onay_notu=%s WHERE id=%s",
@@ -434,7 +437,7 @@ else:
 
                         st.rerun()
 
-                    if r_col.button("Reddet", key=f"red_{row['id']}"):
+                                        if r_col.button("Reddet", key=f"red_{row['id']}"):
                         c.execute("UPDATE talepler SET durum='Reddedildi' WHERE id=%s", (row['id'],))
                         conn.commit()
 

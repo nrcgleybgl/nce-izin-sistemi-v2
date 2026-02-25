@@ -129,7 +129,7 @@ except:
 st.title("🔐 NCE Bordro Danışmanlık ve Eğitim - İK İzin Paneli")
 
 # ---------------------------------------------------
-# DB BAĞLANTISI (UI YÜKLENDİKTEN SONRA)
+# DB BAĞLANTISI
 # ---------------------------------------------------
 @st.cache_resource
 def get_db():
@@ -143,7 +143,6 @@ def get_db():
 
 conn = get_db()
 c = conn.cursor()
-
 # ---------------------------------------------------
 # TABLOLARI OLUŞTUR
 # ---------------------------------------------------
@@ -437,7 +436,7 @@ else:
 
                         st.rerun()
 
-                                        if r_col.button("Reddet", key=f"red_{row['id']}"):
+                    if r_col.button("Reddet", key=f"red_{row['id']}"):
                         c.execute("UPDATE talepler SET durum='Reddedildi' WHERE id=%s", (row['id'],))
                         conn.commit()
 
@@ -572,4 +571,3 @@ else:
 
             except Exception as e:
                 st.error(f"Excel içe aktarılırken hata: {e}")
-

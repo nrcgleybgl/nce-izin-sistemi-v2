@@ -112,13 +112,13 @@ def mail_gonder(alici, konu, icerik):
         print("Mail gönderilemedi:", e)
 
 # ---------------------------------------------------
-# POSTGRESQL BAĞLANTISI
+# NEONCONSOLE BAĞLANTISI
 # ---------------------------------------------------
 conn = psycopg2.connect(
-    dbname='nce_izin_yonetimi_db',
-    user='nce_izin_yonetimi_db_user',
-    password='UiY4DOCsB3Zf8XnF72iFgsLOrTgTgP9e',
-    host='dpg-d6ffijea2pns73dj1lq0-a.oregon-postgres.render.com',
+    dbname='neondb',
+    user='neondb_owner',
+    password='npg_QHWTc95MVzPg',
+    host='ep-nameless-morning-aimuiz3g-pooler.c-4.us-east-1.aws.neon.tech',
     port='5432'
 )
 c = conn.cursor()

@@ -423,13 +423,13 @@ else:
 
                     o_col, r_col = st.columns(2)
 
-                    if o_col.button("Onayla", key=f"on_{row['id']}"):
-                        imza = f"{user['ad_soyad']} ({user['meslek']}) tarafından {date.today()} tarihinde onaylandı."
-                        c.execute(
-                            "UPDATE talepler SET durum='Onaylandı', onay_notu=%s WHERE id=%s",
-                            (imza, row['id'])
-                        )
-                        conn.commit()
+if o_col.button("Onayla", key=f"on_{row['id']}"):
+    imza = f"{user['ad_soyad']} ({user['meslek']}) tarafından {date.today()} tarihinde onaylandı."
+    c.execute(
+    "UPDATE talepler SET durum='Onaylandı', onay_notu=%s WHERE id=%s",
+    (imza, row['id'])
+    )
+    conn.commit()
 
                         p_email = df_p[df_p['ad_soyad'] == row['ad_soyad']]['email'].values[0]
                         mail_gonder(p_email, "İzniniz Onaylandı", f"Sayın {row['ad_soyad']}, izniniz onaylanmıştır.")

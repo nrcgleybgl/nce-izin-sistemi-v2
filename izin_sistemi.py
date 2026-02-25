@@ -118,7 +118,7 @@ conn = psycopg2.connect(
     dbname='neondb',
     user='neondb_owner',
     password='npg_QHWTc95MVzPg',
-    host='ep-nameless-morning-aimuiz3g-pooler.c-4.us-east-1.aws.neon.tech',
+    host='ep-nameless-morning-aimuiz3g.c-4.us-east-1.aws.neon.tech',
     port='5432'
 )
 c = conn.cursor()

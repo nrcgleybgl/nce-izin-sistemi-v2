@@ -114,8 +114,6 @@ def mail_gonder(alici, konu, icerik):
 # ---------------------------------------------------
 # NEONCONSOLE BAĞLANTISI
 # ---------------------------------------------------
-import streamlit as st
-import psycopg2
 
 conn = psycopg2.connect(
     dbname=st.secrets["DB_NAME"],

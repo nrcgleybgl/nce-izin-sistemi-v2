@@ -9,6 +9,11 @@ from email.mime.multipart import MIMEMultipart
 from io import BytesIO
 from fpdf import FPDF
 
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
 # ---------------------------------------------------
 # EXCEL İNDİRME FONKSİYONU
 # ---------------------------------------------------
@@ -89,12 +94,12 @@ def pdf_olustur(veri, logo_path="assets/logo.png"):
     return pdf.output(dest='S').encode('latin-1', errors='ignore')
 
 # ---------------------------------------------------
-# GMAIL SMTP
+# GMAIL SMTP (WEB UYUMLU - .env)
 # ---------------------------------------------------
 def mail_gonder(alici, konu, icerik):
     try:
-        gonderen = "nrcgleybgl@gmail.com"
-        sifre = "jjtw wtax ixoy vptv"
+        gonderen = os.getenv("SMTP_MAIL")
+        sifre = os.getenv("SMTP_SIFRE")
 
         msg = MIMEMultipart()
         msg["From"] = gonderen
@@ -112,16 +117,14 @@ def mail_gonder(alici, konu, icerik):
         print("Mail gönderilemedi:", e)
 
 # ---------------------------------------------------
-# NEON BAĞLANTISI
+# POSTGRESQL BAĞLANTISI (NEON) - STREAMLIT CLOUD
 # ---------------------------------------------------
-import psycopg2
-
 def get_db():
     return psycopg2.connect(
-        dbname="neondb",
-        user="neondb_owner",
+        dbname=os.getenv("DB_NAME"),
+        user=os.getenv("DB_USER"),
         password=os.getenv("DB_PASSWORD"),
-        host="ep-jolly-waterfall-aidwkwyu-pooler.c-4.us-east-1.aws.neon.tech",
+        host=os.getenv("DB_HOST"),
         port="5432",
         sslmode="require",
         options="-c channel_binding=require"
@@ -131,7 +134,7 @@ conn = get_db()
 c = conn.cursor()
 
 # ---------------------------------------------------
-# TABLOLARI OLUŞTUR
+# TABLOLARI OLUŞTUR (PostgreSQL)
 # ---------------------------------------------------
 c.execute("""
 CREATE TABLE IF NOT EXISTS personellers (
@@ -575,4 +578,3 @@ else:
 
             except Exception as e:
                 st.error(f"Excel içe aktarılırken hata: {e}")
-

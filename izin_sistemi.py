@@ -95,8 +95,9 @@ def pdf_olustur(veri, logo_path="assets/logo.png"):
 # ---------------------------------------------------
 def mail_gonder(alici, konu, icerik):
     try:
-        gonderen = st.secrets["SMTP_EMAIL"]
-        sifre = st.secrets["SMTP_PASSWORD"]
+        # BURAYA KENDİ GMAİLİNİ VE UYGULAMA ŞİFRENİ YAZ
+        gonderen = "nrcgleybgl@gmail.com"
+        sifre = "jjtw wtax ixoy vptv"
 
         msg = MIMEMultipart()
         msg['From'] = gonderen
@@ -134,15 +135,16 @@ st.title("🔐 NCE Bordro Danışmanlık ve Eğitim - İK İzin Paneli")
 @st.cache_resource
 def get_db():
     return psycopg2.connect(
-        dbname=st.secrets["DB_NAME"],
-        user=st.secrets["DB_USER"],
-        password=st.secrets["DB_PASSWORD"],
-        host=st.secrets["DB_HOST"],
-        port=st.secrets["DB_PORT"]
+        dbname="neondb",
+        user="neondb_owner",
+        password="npg_DpSkH7jPx3Fm",
+        host="ep-nameless-morning-aimuiz3g.c-4.us-east-1.aws.neon.tech",
+        port="5432"
     )
 
 conn = get_db()
 c = conn.cursor()
+
 # ---------------------------------------------------
 # TABLOLARI OLUŞTUR
 # ---------------------------------------------------
@@ -212,10 +214,6 @@ if not st.session_state.get("login_oldu", False):
                 st.rerun()
             else:
                 st.error("Kullanıcı adı veya şifre hatalı!")
-
-# ---------------------------------------------------
-# ANA PANEL
-# ---------------------------------------------------
 else:
     user = st.session_state['user']
     rol = user.get('rol', 'Personel')
@@ -287,7 +285,6 @@ else:
 
                     st.success("İzin talebiniz başarıyla gönderildi!")
                     st.rerun()
-
     # ---------------------------------------------------
     # İZİNLERİM (DÜZENLE / SİL + PDF)
     # ---------------------------------------------------
@@ -423,13 +420,13 @@ else:
 
                     o_col, r_col = st.columns(2)
 
-if o_col.button("Onayla", key=f"on_{row['id']}"):
-    imza = f"{user['ad_soyad']} ({user['meslek']}) tarafından {date.today()} tarihinde onaylandı."
-    c.execute(
-    "UPDATE talepler SET durum='Onaylandı', onay_notu=%s WHERE id=%s",
-    (imza, row['id'])
-    )
-    conn.commit()
+                    if o_col.button("Onayla", key=f"on_{row['id']}"):
+                        imza = f"{user['ad_soyad']} ({user['meslek']}) tarafından {date.today()} tarihinde onaylandı."
+                        c.execute(
+                            "UPDATE talepler SET durum='Onaylandı', onay_notu=%s WHERE id=%s",
+                            (imza, row['id'])
+                        )
+                        conn.commit()
 
                         p_email = df_p[df_p['ad_soyad'] == row['ad_soyad']]['email'].values[0]
                         mail_gonder(p_email, "İzniniz Onaylandı", f"Sayın {row['ad_soyad']}, izniniz onaylanmıştır.")
@@ -444,7 +441,6 @@ if o_col.button("Onayla", key=f"on_{row['id']}"):
                         mail_gonder(p_email, "İzniniz Reddedildi", f"Sayın {row['ad_soyad']}, izniniz reddedilmiştir.")
 
                         st.rerun()
-
     # ---------------------------------------------------
     # İK GENEL TAKİP
     # ---------------------------------------------------

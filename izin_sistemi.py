@@ -114,13 +114,17 @@ def mail_gonder(alici, konu, icerik):
 # ---------------------------------------------------
 # NEON BAĞLANTISI
 # ---------------------------------------------------
+import psycopg2
+
 def get_db():
     return psycopg2.connect(
         dbname="neondb",
         user="neondb_owner",
-        password="npg_DpSkH7jPx3Fm",
-        host="ep-nameless-morning-aimuiz3g.c-4.us-east-1.aws.neon.tech",
-        port="5432"
+        password=os.getenv("DB_PASSWORD"),
+        host="ep-jolly-waterfall-aidwkwyu-pooler.c-4.us-east-1.aws.neon.tech",
+        port="5432",
+        sslmode="require",
+        options="-c channel_binding=require"
     )
 
 conn = get_db()
@@ -571,3 +575,4 @@ else:
 
             except Exception as e:
                 st.error(f"Excel içe aktarılırken hata: {e}")
+

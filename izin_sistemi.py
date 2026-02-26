@@ -1,6 +1,4 @@
 import streamlit as st
-st.set_page_config(page_title="Pro-İK İzin Portalı", layout="wide")
-
 import pandas as pd
 from datetime import date, timedelta
 import psycopg2
@@ -95,44 +93,27 @@ def pdf_olustur(veri, logo_path="assets/logo.png"):
 # ---------------------------------------------------
 def mail_gonder(alici, konu, icerik):
     try:
-        # BURAYA KENDİ GMAİLİNİ VE UYGULAMA ŞİFRENİ YAZ
         gonderen = "nrcgleybgl@gmail.com"
         sifre = "jjtw wtax ixoy vptv"
 
         msg = MIMEMultipart()
-        msg['From'] = gonderen
-        msg['To'] = alici
-        msg['Subject'] = konu
+        msg["From"] = gonderen
+        msg["To"] = alici
+        msg["Subject"] = konu
+        msg.attach(MIMEText(icerik, "plain"))
 
-        msg.attach(MIMEText(icerik, 'plain'))
-
-        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server = smtplib.SMTP("smtp.gmail.com", 587)
         server.starttls()
         server.login(gonderen, sifre)
         server.sendmail(gonderen, alici, msg.as_string())
         server.quit()
+
     except Exception as e:
-        st.error(f"Mail gönderilemedi: {e}")
+        print("Mail gönderilemedi:", e)
 
 # ---------------------------------------------------
-# STREAMLIT ARAYÜZ BAŞLANGICI
+# NEON BAĞLANTISI
 # ---------------------------------------------------
-
-if 'login_oldu' not in st.session_state:
-    st.session_state['login_oldu'] = False
-    st.session_state['user'] = None
-
-try:
-    st.image("assets/logo.png", width=180)
-except:
-    pass
-
-st.title("🔐 NCE Bordro Danışmanlık ve Eğitim - İK İzin Paneli")
-
-# ---------------------------------------------------
-# DB BAĞLANTISI
-# ---------------------------------------------------
-@st.cache_resource
 def get_db():
     return psycopg2.connect(
         dbname="neondb",
@@ -188,6 +169,21 @@ def veri_getir():
     except:
         return pd.DataFrame()
 
+# ---------------------------------------------------
+# STREAMLIT ARAYÜZ
+# ---------------------------------------------------
+st.set_page_config(page_title="Pro-İK İzin Portalı", layout="wide")
+
+if 'login_oldu' not in st.session_state:
+    st.session_state['login_oldu'] = False
+    st.session_state['user'] = None
+
+df_p = veri_getir()
+
+if not st.session_state['login_oldu']:
+    st.image("assets/logo.png", width=180)
+    st.title("🔐 NCE Bordro Danışmanlık ve Eğitim - İK İzin Paneli")
+
 df_p = veri_getir()
 
 if "Ad Soyad" in df_p.columns:
@@ -214,6 +210,9 @@ if not st.session_state.get("login_oldu", False):
                 st.rerun()
             else:
                 st.error("Kullanıcı adı veya şifre hatalı!")
+# ---------------------------------------------------
+# ANA PANEL
+# ---------------------------------------------------
 else:
     user = st.session_state['user']
     rol = user.get('rol', 'Personel')
@@ -225,11 +224,7 @@ else:
         ana_menu.append("Tüm Talepler (İK)")
         ana_menu.append("Personel Yönetimi (İK)")
 
-    try:
-        st.sidebar.image("assets/logo.png", width=120)
-    except:
-        pass
-
+    st.sidebar.image("assets/logo.png", width=120)
     st.sidebar.title(f"👤 {user['ad_soyad']}")
     st.sidebar.write(f"**Rol:** {rol}")
     st.sidebar.write(f"**Departman:** {user['departman']}")
@@ -285,6 +280,7 @@ else:
 
                     st.success("İzin talebiniz başarıyla gönderildi!")
                     st.rerun()
+
     # ---------------------------------------------------
     # İZİNLERİM (DÜZENLE / SİL + PDF)
     # ---------------------------------------------------
@@ -311,16 +307,21 @@ else:
                         f"Durum: **{row['durum']}**"
                     )
 
+                    # ❌ SİL BUTONU
                     if col2.button("Sil", key=f"sil_{row['id']}"):
                         c.execute("DELETE FROM talepler WHERE id=%s", (row['id'],))
                         conn.commit()
                         st.success("Talep silindi!")
                         st.rerun()
 
+                    # ✏️ DÜZENLE BUTONU
                     if col3.button("Düzenle", key=f"duz_{row['id']}"):
                         st.session_state["duzenlenecek_id"] = row["id"]
                         st.rerun()
 
+            # ---------------------------------------------------
+            # ✏️ DÜZENLEME FORMU
+            # ---------------------------------------------------
             if "duzenlenecek_id" in st.session_state:
                 duz_id = st.session_state["duzenlenecek_id"]
 
@@ -354,6 +355,9 @@ else:
                     st.success("Talep güncellendi!")
                     st.rerun()
 
+            # ---------------------------------------------------
+            # 🖨️ ONAYLANAN İZİNLERİN PDF ÇIKTISI
+            # ---------------------------------------------------
             st.markdown("---")
             st.subheader("🖨️ Onaylanan İzinlerin PDF Çıktısı")
 
@@ -394,7 +398,6 @@ else:
                         file_name=f"izin_formu_{row['id']}.pdf",
                         mime="application/pdf"
                     )
-
     # ---------------------------------------------------
     # YÖNETİCİ ONAY EKRANI
     # ---------------------------------------------------
@@ -441,6 +444,7 @@ else:
                         mail_gonder(p_email, "İzniniz Reddedildi", f"Sayın {row['ad_soyad']}, izniniz reddedilmiştir.")
 
                         st.rerun()
+
     # ---------------------------------------------------
     # İK GENEL TAKİP
     # ---------------------------------------------------

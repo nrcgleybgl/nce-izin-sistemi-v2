@@ -266,12 +266,12 @@ else:
             neden = st.text_area("İzin Nedeni")
 
             if st.form_submit_button("Talebi Gönder"):
-            c.execute("""
-                SELECT COUNT(*) FROM talepler
-                WHERE ad_soyad=%s AND baslangic=%s AND bitis=%s
-            """, (user["ad_soyad"], str(baslangic), str(bitis)))
+                c.execute("""
+                    SELECT COUNT(*) FROM talepler
+                    WHERE ad_soyad=%s AND baslangic=%s AND bitis=%s
+                """, (user["ad_soyad"], str(baslangic), str(bitis)))
 
-            var_mi = c.fetchone()[0]
+                var_mi = c.fetchone()[0]
 
             if var_mi > 0:
                 st.error("Bu tarihlerde zaten bir izin talebiniz var.")

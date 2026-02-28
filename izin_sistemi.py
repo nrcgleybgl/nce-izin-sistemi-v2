@@ -277,11 +277,11 @@ else:
                     st.error("Bu tarihlerde zaten bir izin talebiniz var.")
                     st.stop()
 
-                    if (bitis - baslangic).days > 365:
+                if (bitis - baslangic).days > 365:
                         st.error("İzin süresi 1 yıldan uzun olamaz.")
                         st.stop()
 
-                    if bitis < baslangic:
+                if bitis < baslangic:
                         st.error("Bitiş tarihi başlangıç tarihinden önce olamaz.")
                     else:
                         c.execute("""

@@ -283,29 +283,29 @@ else:
 
                 if bitis < baslangic:
                         st.error("Bitiş tarihi başlangıç tarihinden önce olamaz.")
-                    else:
-                        c.execute("""
-                            INSERT INTO talepler (ad_soyad, departman, meslek, tip, baslangic, bitis, neden, durum)
-                            VALUES (%s,%s,%s,%s,%s,%s,%s,'Beklemede')
-                        """, (
-                            user["ad_soyad"],
-                            user["departman"],
-                            user["meslek"],
-                            tip,
-                            str(baslangic),
-                            str(bitis),
-                            neden
-                        ))
-                        conn.commit()
+                else:
+                    c.execute("""
+                        INSERT INTO talepler (ad_soyad, departman, meslek, tip, baslangic, bitis, neden, durum)
+                        VALUES (%s,%s,%s,%s,%s,%s,%s,'Beklemede')
+                    """, (
+                        user["ad_soyad"],
+                        user["departman"],
+                        user["meslek"],
+                        tip,
+                        str(baslangic),
+                        str(bitis),
+                        neden
+                    ))
+                    conn.commit()
 
-                        mail_gonder(
-                            user["onayci_email"],
-                            "Yeni İzin Talebi",
-                            f"{user['ad_soyad']} tarafından yeni bir izin talebi oluşturuldu."
-                        )
+                    mail_gonder(
+                        user["onayci_email"],
+                        "Yeni İzin Talebi",
+                        f"{user['ad_soyad']} tarafından yeni bir izin talebi oluşturuldu."
+                     )
 
-                        st.success("İzin talebiniz başarıyla gönderildi!")
-                        st.rerun()
+                    st.success("İzin talebiniz başarıyla gönderildi!")
+                    st.rerun()
 
     # ---------------------------------------------------
     # İZİNLERİM (DÜZENLE / SİL + PDF)

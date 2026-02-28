@@ -278,12 +278,12 @@ if menu == "İzin Talep Formu":
             # 🔒 1 YILLIK SINIR
             if (bitis - baslangic).days > 365:
                 st.error("İzin süresi 1 yıldan uzun olamaz.")
-                st.stop()
+                return
 
             # 🔒 TARİH KONTROLÜ
             if bitis < baslangic:
                 st.error("Bitiş tarihi başlangıç tarihinden önce olamaz.")
-                st.stop()
+                return
 
             # 🔒 MÜKERRER İZİN KONTROLÜ
             c.execute("""
@@ -295,7 +295,7 @@ if menu == "İzin Talep Formu":
 
             if var_mi > 0:
                 st.error("Bu tarihlerde zaten bir izin talebiniz var.")
-                st.stop()
+                return
 
             # 🔵 İZİN KAYDI
             c.execute("""

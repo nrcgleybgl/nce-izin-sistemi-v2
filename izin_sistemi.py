@@ -14,6 +14,14 @@ import os
 
 load_dotenv()
 
+from datetime import datetime
+
+def tr_tarih(t):
+    try:
+        return datetime.strptime(t, "%Y-%m-%d").strftime("%d/%m/%Y")
+    except:
+        return t
+
 # ---------------------------------------------------
 # EXCEL İNDİRME FONKSİYONU
 # ---------------------------------------------------
@@ -277,8 +285,8 @@ else:
                         user["departman"],
                         user["meslek"],
                         tip,
-                        str(baslangic),
-                        str(bitis),
+                        baslangic.strftime("%d/%m/%Y"),
+                        bitis.strftime("%d/%m/%Y"),
                         neden
                     ))
                     conn.commit()

@@ -365,10 +365,32 @@ else:
                     del st.session_state["duzenlenecek_id"]
                     st.success("Talep güncellendi!")
                     st.rerun()
-                if (bitis - baslangic).days>365:
+                if (bitis - baslangic).days > 365:
                     st.error("İzin süresi 1 yıldan uzun olamaz")
                 else:
-                    # mevcut INSERT işlemi
+                    try:
+                        # SQL INSERT sorgusu
+                        c.execute(
+                            """
+                            INSERT INTO talepler (ad_soyad, email, tip, baslangic, bitis, neden, durum, onayci_email)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                            """,
+                            (
+                                user['ad_soyad'],       # personel adı
+                                user['email'],          # personel email
+                                tip,                    # izin tipi, örn: "Yıllık İzin"
+                                baslangic,              # datetime
+                                bitis,                  # datetime
+                                aciklama,               # izin nedeni
+                                "Beklemede",            # durum başlangıçta
+                                onayci_email            # yöneticinin emaili
+                            )
+                        )
+                        conn.commit()  # Değişiklikleri kaydet
+
+                        st.success("İzin talebiniz başarıyla gönderildi.")
+                    except Exception as e:
+                        st.error(f"İzin kaydı sırasında bir hata oluştu: {e}")
 
             # ---------------------------------------------------
             # 🖨️ ONAYLANAN İZİNLERİN PDF ÇIKTISI
@@ -586,4 +608,3 @@ else:
 
             except Exception as e:
                 st.error(f"Excel içe aktarılırken hata: {e}")
-

@@ -273,39 +273,39 @@ else:
 
                 var_mi = c.fetchone()[0]
 
-            if var_mi > 0:
-                st.error("Bu tarihlerde zaten bir izin talebiniz var.")
-                st.stop()
-
-                if (bitis - baslangic).days > 365:
-                    st.error("İzin süresi 1 yıldan uzun olamaz.")
+                if var_mi > 0:
+                    st.error("Bu tarihlerde zaten bir izin talebiniz var.")
                     st.stop()
 
-                if bitis < baslangic:
-                    st.error("Bitiş tarihi başlangıç tarihinden önce olamaz.")
-                else:
-                    c.execute("""
-                        INSERT INTO talepler (ad_soyad, departman, meslek, tip, baslangic, bitis, neden, durum)
-                        VALUES (%s,%s,%s,%s,%s,%s,%s,'Beklemede')
-                    """, (
-                        user["ad_soyad"],
-                        user["departman"],
-                        user["meslek"],
-                        tip,
-                        str(baslangic),
-                        str(bitis),
-                        neden
-                    ))
-                    conn.commit()
+                    if (bitis - baslangic).days > 365:
+                        st.error("İzin süresi 1 yıldan uzun olamaz.")
+                        st.stop()
 
-                    mail_gonder(
-                        user["onayci_email"],
-                        "Yeni İzin Talebi",
-                        f"{user['ad_soyad']} tarafından yeni bir izin talebi oluşturuldu."
-                    )
+                    if bitis < baslangic:
+                        st.error("Bitiş tarihi başlangıç tarihinden önce olamaz.")
+                    else:
+                        c.execute("""
+                            INSERT INTO talepler (ad_soyad, departman, meslek, tip, baslangic, bitis, neden, durum)
+                            VALUES (%s,%s,%s,%s,%s,%s,%s,'Beklemede')
+                        """, (
+                            user["ad_soyad"],
+                            user["departman"],
+                            user["meslek"],
+                            tip,
+                            str(baslangic),
+                            str(bitis),
+                            neden
+                        ))
+                        conn.commit()
 
-                    st.success("İzin talebiniz başarıyla gönderildi!")
-                    st.rerun()
+                        mail_gonder(
+                            user["onayci_email"],
+                            "Yeni İzin Talebi",
+                            f"{user['ad_soyad']} tarafından yeni bir izin talebi oluşturuldu."
+                        )
+
+                        st.success("İzin talebiniz başarıyla gönderildi!")
+                        st.rerun()
 
     # ---------------------------------------------------
     # İZİNLERİM (DÜZENLE / SİL + PDF)

@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from datetime import date, datetime
+from datetime import date, timedelta
 import psycopg2
 import psycopg2.extras
 import smtplib
@@ -8,19 +8,11 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from io import BytesIO
 from fpdf import FPDF
+
 from dotenv import load_dotenv
 import os
 
 load_dotenv()
-
-# ---------------------------------------------------
-# TARİH FORMAT FONKSİYONU
-# ---------------------------------------------------
-def tr_tarih(t):
-    try:
-        return datetime.strptime(t, "%Y-%m-%d").strftime("%d/%m/%Y")
-    except:
-        return t
 
 # ---------------------------------------------------
 # EXCEL İNDİRME FONKSİYONU
@@ -81,8 +73,8 @@ def pdf_olustur(veri, logo_path="assets/logo.png"):
 
     kutu_baslik("IZIN BILGILERI")
     satir("Izin Turu", veri["tip"])
-    satir("Baslangic Tarihi", tr_tarih(veri["baslangic"]))
-    satir("Bitis Tarihi", tr_tarih(veri["bitis"]))
+    satir("Baslangic Tarihi", veri["baslangic"])
+    satir("Bitis Tarihi", veri["bitis"])
 
     pdf.set_font("Arial", size=11)
     pdf.cell(50, 8, fix("Izin Nedeni:"), border=1)
@@ -124,9 +116,11 @@ def mail_gonder(alici, konu, icerik):
     except Exception as e:
         print("Mail gönderilemedi:", e)
 
-# ---------------------------------------------------
-# VERİTABANI BAĞLANTISI
-# ---------------------------------------------------
+import psycopg2
+import os
+import streamlit as st
+
+# Fonksiyon
 def get_db():
     return psycopg2.connect(
         dbname=os.getenv("DB_NAME"),
@@ -136,6 +130,7 @@ def get_db():
         sslmode="require"
     )
 
+# Bağlantıyı oluşturma
 try:
     conn = get_db()
     c = conn.cursor()
@@ -226,7 +221,6 @@ if not st.session_state.get("login_oldu", False):
                 st.rerun()
             else:
                 st.error("Kullanıcı adı veya şifre hatalı!")
-
 # ---------------------------------------------------
 # ANA PANEL
 # ---------------------------------------------------
@@ -271,50 +265,32 @@ else:
             bitis = st.date_input("Bitiş Tarihi", date.today())
             neden = st.text_area("İzin Nedeni")
 
-            gonder = st.form_submit_button("Talebi Gönder")
+            if st.form_submit_button("Talebi Gönder"):
+                if bitis < baslangic:
+                    st.error("Bitiş tarihi başlangıç tarihinden önce olamaz.")
+                else:
+                    c.execute("""
+                        INSERT INTO talepler (ad_soyad, departman, meslek, tip, baslangic, bitis, neden, durum)
+                        VALUES (%s,%s,%s,%s,%s,%s,%s,'Beklemede')
+                    """, (
+                        user["ad_soyad"],
+                        user["departman"],
+                        user["meslek"],
+                        tip,
+                        str(baslangic),
+                        str(bitis),
+                        neden
+                    ))
+                    conn.commit()
 
-        if gonder:
+                    mail_gonder(
+                        user["onayci_email"],
+                        "Yeni İzin Talebi",
+                        f"{user['ad_soyad']} tarafından yeni bir izin talebi oluşturuldu."
+                    )
 
-            if (bitis - baslangic).days > 365:
-                st.error("İzin süresi 1 yıldan uzun olamaz.")
-                st.stop()
-
-            if bitis < baslangic:
-                st.error("Bitiş tarihi başlangıç tarihinden önce olamaz.")
-                st.stop()
-
-            c.execute("""
-                SELECT COUNT(*) FROM talepler
-                WHERE ad_soyad=%s AND baslangic=%s AND bitis=%s
-            """, (user["ad_soyad"], str(baslangic), str(bitis)))
-            var_mi = c.fetchone()[0]
-
-            if var_mi > 0:
-                st.error("Bu tarihlerde zaten bir izin talebiniz var.")
-                st.stop()
-
-            c.execute("""
-                INSERT INTO talepler (ad_soyad, departman, meslek, tip, baslangic, bitis, neden, durum)
-                VALUES (%s,%s,%s,%s,%s,%s,%s,'Beklemede')
-            """, (
-                user["ad_soyad"],
-                user["departman"],
-                user["meslek"],
-                tip,
-                str(baslangic),
-                str(bitis),
-                neden
-            ))
-            conn.commit()
-
-            mail_gonder(
-                user["onayci_email"],
-                "Yeni İzin Talebi",
-                f"{user['ad_soyad']} tarafından yeni bir izin talebi oluşturuldu."
-            )
-
-            st.success("İzin talebiniz başarıyla gönderildi!")
-            st.rerun()
+                    st.success("İzin talebiniz başarıyla gönderildi!")
+                    st.rerun()
 
     # ---------------------------------------------------
     # İZİNLERİM (DÜZENLE / SİL + PDF)
@@ -338,21 +314,25 @@ else:
                     col1, col2, col3 = st.columns([4, 1, 1])
 
                     col1.write(
-                        f"**{row['tip']}** — {tr_tarih(row['baslangic'])} → {tr_tarih(row['bitis'])}  \n"
+                        f"**{row['tip']}** — {row['baslangic']} → {row['bitis']}  \n"
                         f"Durum: **{row['durum']}**"
                     )
 
+                    # ❌ SİL BUTONU
                     if col2.button("Sil", key=f"sil_{row['id']}"):
                         c.execute("DELETE FROM talepler WHERE id=%s", (row['id'],))
                         conn.commit()
                         st.success("Talep silindi!")
                         st.rerun()
 
+                    # ✏️ DÜZENLE BUTONU
                     if col3.button("Düzenle", key=f"duz_{row['id']}"):
                         st.session_state["duzenlenecek_id"] = row["id"]
                         st.rerun()
 
-            # Düzenleme formu
+            # ---------------------------------------------------
+            # ✏️ DÜZENLEME FORMU
+            # ---------------------------------------------------
             if "duzenlenecek_id" in st.session_state:
                 duz_id = st.session_state["duzenlenecek_id"]
 
@@ -386,7 +366,9 @@ else:
                     st.success("Talep güncellendi!")
                     st.rerun()
 
-            # Onaylanan izinler için PDF
+            # ---------------------------------------------------
+            # 🖨️ ONAYLANAN İZİNLERİN PDF ÇIKTISI
+            # ---------------------------------------------------
             st.markdown("---")
             st.subheader("🖨️ Onaylanan İzinlerin PDF Çıktısı")
 
@@ -424,11 +406,9 @@ else:
                     st.download_button(
                         label=f"📥 {row['baslangic']} - {row['tip']} PDF İndir",
                         data=pdf_bytes,
-                        file_name=f"{user['ad_soyad']}_{row['tip'].replace(' ', '_')}_{user['sicil']}.pdf",
-                        mime="application/pdf",
-                        key=f"pdf_{row['id']}"
+                        file_name=f"izin_formu_{row['id']}.pdf",
+                        mime="application/pdf"
                     )
-
     # ---------------------------------------------------
     # YÖNETİCİ ONAY EKRANI
     # ---------------------------------------------------
@@ -491,26 +471,6 @@ else:
             file_name="tum_talepler.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
-
-        st.markdown("---")
-        st.subheader("Tekil İzin Sil")
-
-        sil_id = st.number_input("Silinecek izin ID", min_value=1, step=1)
-
-        if st.button("❌ Bu İzni Sil"):
-            c.execute("DELETE FROM talepler WHERE id=%s", (sil_id,))
-            conn.commit()
-            st.success(f"ID {sil_id} olan izin başarıyla silindi!")
-            st.rerun()
-
-        st.markdown("---")
-        st.subheader("Toplu Silme İşlemleri")
-
-        if st.button("⚠️ Tüm İzin Taleplerini Sil"):
-            c.execute("DELETE FROM talepler")
-            conn.commit()
-            st.success("Tüm izin talepleri başarıyla silindi!")
-            st.rerun()
 
     # ---------------------------------------------------
     # PERSONEL YÖNETİMİ (İK)

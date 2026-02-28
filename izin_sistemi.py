@@ -380,6 +380,17 @@ else:
                     del st.session_state["duzenlenecek_id"]
                     st.success("Talep güncellendi!")
                     st.rerun()
+                    duz_kayit = pd.read_sql_query(
+                        f"SELECT * FROM talepler WHERE id={duz_id}",
+                        conn
+                    )
+
+                    if duz_kayit.empty:
+                        del st.session_state["duzenlenecek_id"]
+                        st.warning("Düzenlenecek kayıt bulunamadı (silinmiş olabilir).")
+                        st.rerun()
+
+                    duz_row = duz_kayit.iloc[0]
 
             # ---------------------------------------------------
             # 🖨️ ONAYLANAN İZİNLERİN PDF ÇIKTISI

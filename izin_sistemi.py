@@ -365,32 +365,6 @@ else:
                     del st.session_state["duzenlenecek_id"]
                     st.success("Talep güncellendi!")
                     st.rerun()
-                if (bitis - baslangic).days > 365:
-                    st.error("İzin süresi 1 yıldan uzun olamaz")
-                else:
-                    try:
-                        # SQL INSERT sorgusu
-                        c.execute(
-                            """
-                            INSERT INTO talepler (ad_soyad, email, tip, baslangic, bitis, neden, durum, onayci_email)
-                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                            """,
-                            (
-                                user['ad_soyad'],       # personel adı
-                                user['email'],          # personel email
-                                tip,                    # izin tipi, örn: "Yıllık İzin"
-                                baslangic,              # datetime
-                                bitis,                  # datetime
-                                aciklama,               # izin nedeni
-                                "Beklemede",            # durum başlangıçta
-                                onayci_email            # yöneticinin emaili
-                            )
-                        )
-                        conn.commit()  # Değişiklikleri kaydet
-
-                        st.success("İzin talebiniz başarıyla gönderildi.")
-                    except Exception as e:
-                        st.error(f"İzin kaydı sırasında bir hata oluştu: {e}")
 
             # ---------------------------------------------------
             # 🖨️ ONAYLANAN İZİNLERİN PDF ÇIKTISI
@@ -497,6 +471,12 @@ else:
             file_name="tum_talepler.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
+sil_id = st.number_input("Silinecek izin ID", min_value=1, step=1)
+if st.button("❌ Bu İzni Sil"):
+    c.execute("DELETE FROM talepler WHERE id=%s", (sil_id,))
+    conn.commit()
+    st.success("İzin silindi!")
+    st.rerun()
 
     # ---------------------------------------------------
     # PERSONEL YÖNETİMİ (İK)

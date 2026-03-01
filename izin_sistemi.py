@@ -96,8 +96,8 @@ def pdf_olustur(veri, logo_path="assets/logo.png"):
 
     # İMZA ALANLARI
     pdf.set_font("DejaVu", "B", 12)
-    pdf.cell(95, 10, "Personel İmzası", border=1, ln=False, align='C')
-    pdf.cell(95, 10, "Yönetici İmzası", border=1, ln=True, align='C')
+    pdf.cell(90, 10, "Personel İmzası", border=1, ln=False, align='C')
+    pdf.cell(90, 10, "Yönetici İmzası", border=1, ln=True, align='C')
 
     return pdf.output(dest='S').encode('latin1')
 
@@ -630,3 +630,4 @@ else:
 
             except Exception as e:
                 st.error(f"Excel içe aktarılırken hata: {e}")
+

@@ -77,7 +77,13 @@ def pdf_olustur(veri, logo_path="assets/logo.png"):
 
     pdf.set_font("DejaVu", "", 11)
     pdf.cell(50, 8, "İzin Nedeni:", border=1)
-    pdf.multi_cell(140, 8, str(veri["neden"]), border=1)
+    
+    # Boş gelirse PDF boş görünmesin diye fallback metni
+    neden_metin = str(veri.get("neden","")).strip()
+    if not neden_metin:
+        neden_metin="Belirtilmemiş"
+
+    pdf.multi_cell(140, 8, neden_metin, border=1)
     pdf.ln(5)
 
     # YÖNETİCİ ONAYI

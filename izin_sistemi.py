@@ -630,4 +630,3 @@ else:
 
             except Exception as e:
                 st.error(f"Excel içe aktarılırken hata: {e}")
-s

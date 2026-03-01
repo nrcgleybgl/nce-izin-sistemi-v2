@@ -33,66 +33,69 @@ def pdf_olustur(veri, logo_path="assets/logo.png"):
     def fix(metin):
         if metin is None:
             return ""
-        karakterler = {
-            'ğ': 'g', 'Ğ': 'G', 'ş': 's', 'Ş': 'S',
-            'İ': 'I', 'ı': 'i', 'ç': 'c', 'Ç': 'C',
-            'ö': 'o', 'Ö': 'O', 'ü': 'u', 'Ü': 'U'
-        }
-        for eski, yeni in karakterler.items():
-            metin = metin.replace(eski, yeni)
-        return metin
+        return str(metin)
 
+    # LOGO
     try:
         pdf.image(logo_path, x=80, y=10, w=50)
     except:
         pass
 
     pdf.ln(35)
+
+    # TÜRKÇE FONTLAR
     pdf.add_font("DejaVu", "", "fonts/DejaVuSans.ttf", uni=True)
     pdf.add_font("DejaVu", "B", "fonts/DejaVuSans-Bold.ttf", uni=True)
+
+    # BAŞLIK
     pdf.set_font("DejaVu", "B", 18)
-    pdf.set_font("Arial", 'B', 18)
-    pdf.cell(0, 10, fix("IZIN TALEP FORMU"), ln=True, align='C')
+    pdf.cell(0, 10, "İZİN TALEP FORMU", ln=True, align='C')
     pdf.ln(5)
 
+    # KUTU BAŞLIĞI
     def kutu_baslik(baslik):
-        pdf.set_font("Arial", 'B', 12)
+        pdf.set_font("DejaVu", "B", 12)
         pdf.set_fill_color(230, 230, 230)
-        pdf.cell(190, 8, fix(baslik), ln=True, fill=True)
+        pdf.cell(190, 8, baslik, ln=True, fill=True)
 
+    # SATIR
     def satir(label, value):
-        pdf.set_font("Arial", size=11)
-        pdf.cell(50, 8, fix(f"{label}:"), border=1)
-        pdf.cell(140, 8, fix(str(value)), border=1, ln=True)
+        pdf.set_font("DejaVu", "", 11)
+        pdf.cell(50, 8, f"{label}:", border=1)
+        pdf.cell(140, 8, fix(value), border=1, ln=True)
 
-    kutu_baslik("PERSONEL BILGILERI")
+    # PERSONEL BİLGİLERİ
+    kutu_baslik("PERSONEL BİLGİLERİ")
     satir("Ad Soyad", veri["ad_soyad"])
     satir("Sicil No", veri["sicil"])
     satir("Departman", veri["departman"])
-    satir("Gorevi", veri["meslek"])
+    satir("Görevi", veri["meslek"])
     satir("Cep Telefonu", veri["telefon"])
     satir("Mail Adresi", veri["email"])
     pdf.ln(5)
 
-    kutu_baslik("IZIN BILGILERI")
-    satir("Izin Turu", veri["tip"])
-    satir("Baslangic Tarihi", veri["baslangic"])
-    satir("Bitis Tarihi", veri["bitis"])
+    # İZİN BİLGİLERİ
+    kutu_baslik("İZİN BİLGİLERİ")
+    satir("İzin Türü", veri["tip"])
+    satir("Başlangıç Tarihi", veri["baslangic"])
+    satir("Bitiş Tarihi", veri["bitis"])
 
-    pdf.set_font("Arial", size=11)
-    pdf.cell(50, 8, fix("Izin Nedeni:"), border=1)
-    pdf.multi_cell(140, 8, fix(str(veri["neden"])), border=1)
+    pdf.set_font("DejaVu", "", 11)
+    pdf.cell(50, 8, "İzin Nedeni:", border=1)
+    pdf.multi_cell(140, 8, fix(veri["neden"]), border=1)
     pdf.ln(5)
 
+    # YÖNETİCİ ONAYI
     if veri["durum"] == "Onaylandı" and veri["yonetici"]:
-        kutu_baslik("YONETICI ONAYI")
-        metin = f"Bu izin, {veri['yonetici']} tarafindan {veri['onay_tarihi']} tarihinde onaylanmistir."
-        pdf.multi_cell(190, 8, fix(metin), border=1)
+        kutu_baslik("YÖNETİCİ ONAYI")
+        metin = f"Bu izin, {veri['yonetici']} tarafından {veri['onay_tarihi']} tarihinde onaylanmıştır."
+        pdf.multi_cell(190, 8, metin, border=1)
         pdf.ln(5)
 
-    pdf.set_font("Arial", 'B', 12)
-    pdf.cell(95, 10, fix("Personel Imzasi"), border=1, ln=False, align='C')
-    pdf.cell(95, 10, fix("Yonetici Imzasi"), border=1, ln=True, align='C')
+    # İMZA ALANLARI
+    pdf.set_font("DejaVu", "B", 12)
+    pdf.cell(95, 10, "Personel İmzası", border=1, ln=False, align='C')
+    pdf.cell(95, 10, "Yönetici İmzası", border=1, ln=True, align='C')
 
     return pdf.output(dest='S').encode('utf-8')
 

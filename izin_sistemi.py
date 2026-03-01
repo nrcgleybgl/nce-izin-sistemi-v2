@@ -48,6 +48,9 @@ def pdf_olustur(veri, logo_path="assets/logo.png"):
         pass
 
     pdf.ln(35)
+    pdf.add_font("DejaVu", "", "DejaVuSans.ttf", uni=True)
+    pdf.add_font("DejaVu", "B", "DejaVuSans-Bold.ttf", uni=True)
+    pdf.set_font("DejaVu", "B", 18)
     pdf.set_font("Arial", 'B', 18)
     pdf.cell(0, 10, fix("IZIN TALEP FORMU"), ln=True, align='C')
     pdf.ln(5)
@@ -91,7 +94,7 @@ def pdf_olustur(veri, logo_path="assets/logo.png"):
     pdf.cell(95, 10, fix("Personel Imzasi"), border=1, ln=False, align='C')
     pdf.cell(95, 10, fix("Yonetici Imzasi"), border=1, ln=True, align='C')
 
-    return pdf.output(dest='S').encode('latin-1', errors='ignore')
+    return pdf.output(dest='S').encode('utf-8')
 
 # ---------------------------------------------------
 # GMAIL SMTP (WEB UYUMLU - .env)

@@ -30,10 +30,9 @@ def pdf_olustur(veri, logo_path="assets/logo.png"):
     pdf = FPDF()
     pdf.add_page()
 
-    def fix(metin):
-        if metin is None:
-            return ""
-        return str(metin)
+    # TÜRKÇE FONTLAR
+    pdf.add_font("DejaVu", "", "fonts/DejaVuSans.ttf", uni=True)
+    pdf.add_font("DejaVu", "B", "fonts/DejaVuSans-Bold.ttf", uni=True)
 
     # LOGO
     try:
@@ -42,10 +41,6 @@ def pdf_olustur(veri, logo_path="assets/logo.png"):
         pass
 
     pdf.ln(35)
-
-    # TÜRKÇE FONTLAR
-    pdf.add_font("DejaVu", "", "fonts/DejaVuSans.ttf", uni=True)
-    pdf.add_font("DejaVu", "B", "fonts/DejaVuSans-Bold.ttf", uni=True)
 
     # BAŞLIK
     pdf.set_font("DejaVu", "B", 18)
@@ -62,7 +57,7 @@ def pdf_olustur(veri, logo_path="assets/logo.png"):
     def satir(label, value):
         pdf.set_font("DejaVu", "", 11)
         pdf.cell(50, 8, f"{label}:", border=1)
-        pdf.cell(140, 8, fix(value), border=1, ln=True)
+        pdf.cell(140, 8, str(value), border=1, ln=True)
 
     # PERSONEL BİLGİLERİ
     kutu_baslik("PERSONEL BİLGİLERİ")
@@ -82,7 +77,7 @@ def pdf_olustur(veri, logo_path="assets/logo.png"):
 
     pdf.set_font("DejaVu", "", 11)
     pdf.cell(50, 8, "İzin Nedeni:", border=1)
-    pdf.multi_cell(140, 8, fix(veri["neden"]), border=1)
+    pdf.multi_cell(140, 8, str(veri["neden"]), border=1)
     pdf.ln(5)
 
     # YÖNETİCİ ONAYI

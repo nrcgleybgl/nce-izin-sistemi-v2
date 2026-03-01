@@ -56,8 +56,8 @@ def pdf_olustur(veri, logo_path="assets/logo.png"):
     # SATIR
     def satir(label, value):
         pdf.set_font("DejaVu", "", 11)
-        pdf.cell(50, 8, f"{label}:", border=1)
-        pdf.cell(140, 8, str(value), border=1, ln=True)
+        pdf.cell(60, 8, f"{label}:", border=1)
+        pdf.cell(120, 8, str(value), border=1, ln=True)
 
     # PERSONEL BİLGİLERİ
     kutu_baslik("PERSONEL BİLGİLERİ")
@@ -84,7 +84,7 @@ def pdf_olustur(veri, logo_path="assets/logo.png"):
         neden_metin = "Belirtilmemiş"
     else:
         neden_metin = str(neden_metin)
-    pdf.multi_cell(140, 8, neden_metin, border=1)
+    pdf.multi_cell(180, 8, neden_metin, border=1)
     pdf.ln(5)
 
     # YÖNETİCİ ONAYI
